@@ -476,5 +476,6 @@ class _SlidingSheetScrollPosition extends ScrollPositionWithSingleContext {
     // Scrollable expects that we will dispose of its current _dragCancelCallback
     _dragCancelCallback?.call();
     _dragCancelCallback = null;
+    goIdle();
   }
 }

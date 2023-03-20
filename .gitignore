@@ -36,3 +36,5 @@ Breakpoints_v2.xcbkptlist
 node_modules
 plugins/dynamic_card/.fvm/flutter_sdk
 .fvm/
+flutter_export_environment.sh
+Generated.xcconfig

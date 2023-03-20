@@ -37,7 +37,6 @@ Future<T?> showSlidingBottomSheet<T>(
           valueListenable: rebuilder,
           builder: (context, dynamic value, _) {
             dialog = builder(context);
-            print("++++++++ValueListenableBuilder");
             // Assign the rebuild function in order to
             // be able to change the dialogs parameters
             // inside a dialog.
@@ -68,6 +67,7 @@ Future<T?> showSlidingBottomSheet<T>(
                   theme.dialogBackgroundColor,
               backdropColor: dialog.backdropColor,
               shadowColor: dialog.shadowColor,
+              maxWidth: dialog.maxWidth,
               elevation: dialog.elevation,
               padding: dialog.padding,
               avoidStatusBar: dialog.avoidStatusBar,
@@ -77,7 +77,6 @@ Future<T?> showSlidingBottomSheet<T>(
               cornerRadiusOnFullscreen: dialog.cornerRadiusOnFullscreen,
               closeOnBackdropTap: dialog.dismissOnBackdropTap,
               scrollSpec: dialog.scrollSpec,
-              maxWidth: dialog.maxWidth,
               closeSheetOnBackButtonPressed: false,
               minHeight: dialog.minHeight,
               isDismissable: dialog.isDismissable,
@@ -88,13 +87,32 @@ Future<T?> showSlidingBottomSheet<T>(
               liftOnScrollHeaderElevation: dialog.liftOnScrollHeaderElevation,
               liftOnScrollFooterElevation: dialog.liftOnScrollFooterElevation,
               body: null,
+              textfieldOptimization: dialog.textfieldOptimization,
             );
 
             if (parentBuilder != null) {
               sheet = parentBuilder(context, sheet as SlidingSheet);
             }
-
-            if (resizeToAvoidBottomInset) {
+            if (resizeToAvoidBottomInset && dialog.textfieldOptimization) {
+              sheet = Stack(
+                children: [
+                  Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        color: dialog.color,
+                        height: MediaQuery.of(context).viewInsets.bottom,
+                      )),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: sheet,
+                  ),
+                ],
+              );
+            } else if (resizeToAvoidBottomInset) {
               sheet = Padding(
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -201,6 +219,9 @@ class SlidingSheetDialog {
   /// {@macro sliding_sheet.liftOnScrollFooterElevation}
   final double liftOnScrollFooterElevation;
 
+  /// {@macro sliding_sheet.textfieldOptimization}
+  final bool textfieldOptimization;
+
   /// Creates a wrapper class to show a [SlidingSheet] as a bottom sheet dialog.
   const SlidingSheetDialog({
     this.builder,
@@ -232,6 +253,7 @@ class SlidingSheetDialog {
     this.extendBody = false,
     this.liftOnScrollHeaderElevation = 0.0,
     this.liftOnScrollFooterElevation = 0.0,
+    this.textfieldOptimization = false,
   });
 }
 

@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:example/util/buttom_sheet_darg_tag.dart';
+import 'package:example/util/custom_vertical_drag_detector.dart';
 import 'package:example/util/util.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import 'package:sliding_sheet/sliding_sheet.dart';
 
@@ -54,9 +55,10 @@ class _ExampleState extends State<Example> {
               color: Colors.red,
             ),
           ),
-          Expanded(
-            child: buildSheet(),
-          ),
+          Expanded(child: _buildBody())
+          // Expanded(
+          //   child: buildSheet(),
+          // ),
         ],
       ),
     );
@@ -123,8 +125,8 @@ class _ExampleState extends State<Example> {
               width: 16,
               height: 4,
               borderRadius: 2,
-              color:
-                  Colors.grey.withOpacity(.5 * (1 - interval(0.7, 1.0, state.progress))),
+              color: Colors.grey
+                  .withOpacity(.5 * (1 - interval(0.7, 1.0, state.progress))),
             ),
           ),
           const SizedBox(height: 8),
@@ -166,8 +168,8 @@ class _ExampleState extends State<Example> {
       Icon icon,
       Text text,
       VoidCallback onTap, {
-      BorderSide border,
-      Color color,
+      BorderSide? border,
+      Color? color,
     }) {
       final child = Row(
         mainAxisSize: MainAxisSize.min,
@@ -217,7 +219,7 @@ class _ExampleState extends State<Example> {
             ),
             () async {
               // Inherit from context...
-              await SheetController.of(context).hide();
+              await SheetController.of(context)?.hide();
               Future.delayed(const Duration(milliseconds: 1500), () {
                 // or use the controller
                 controller.show();
@@ -227,7 +229,8 @@ class _ExampleState extends State<Example> {
           ),
           const SizedBox(width: 8),
           SheetListenerBuilder(
-            buildWhen: (oldState, newState) => oldState.isExpanded != newState.isExpanded,
+            buildWhen: (oldState, newState) =>
+                oldState.isExpanded != newState.isExpanded,
             builder: (context, state) {
               final isExpanded = state.isExpanded;
 
@@ -332,7 +335,7 @@ class _ExampleState extends State<Example> {
         divider,
         const SizedBox(height: 32),
         Icon(
-          MdiIcons.github,
+          Icons.access_alarm,
           color: Colors.grey.shade900,
           size: 48,
         ),
@@ -366,8 +369,8 @@ class _ExampleState extends State<Example> {
   Widget buildSteps(BuildContext context) {
     final steps = [
       Step('Go to your pubspec.yaml file.', '2 seconds'),
-      Step(
-          "Add the newest version of 'sliding_sheet' to your dependencies.", '5 seconds'),
+      Step("Add the newest version of 'sliding_sheet' to your dependencies.",
+          '5 seconds'),
       Step("Run 'flutter packages get' in the terminal.", '4 seconds'),
       Step("Happy coding!", 'Forever'),
     ];
@@ -431,7 +434,9 @@ class _ExampleState extends State<Example> {
           Traffic(0.6, '16:30'),
         ],
         colorFn: (traffic, __) {
-          if (traffic.time == '14:30') return charts.Color.fromHex(code: '#F0BA64');
+          if (traffic.time == '14:30') {
+            return charts.Color.fromHex(code: '#F0BA64');
+          }
           return charts.MaterialPalette.gray.shade300;
         },
         domainFn: (Traffic traffic, _) => traffic.time,
@@ -506,7 +511,8 @@ class _ExampleState extends State<Example> {
 
             if (backButton || backDrop) {
               const duration = Duration(milliseconds: 300);
-              await controller.snapToExtent(0.2, duration: duration, clamp: false);
+              await controller.snapToExtent(0.2,
+                  duration: duration, clamp: false);
               await controller.snapToExtent(0.4, duration: duration);
               // or Navigator.pop(context);
             }
@@ -526,7 +532,7 @@ class _ExampleState extends State<Example> {
                 children: <Widget>[
                   Text(
                     'Confirm purchase',
-                    style: textTheme.headline4.copyWith(
+                    style: textTheme.headline4?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -537,7 +543,7 @@ class _ExampleState extends State<Example> {
                       Expanded(
                         child: Text(
                           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sagittis tellus lacus, et pulvinar orci eleifend in.',
-                          style: textTheme.subtitle1.copyWith(
+                          style: textTheme.subtitle1?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -566,7 +572,7 @@ class _ExampleState extends State<Example> {
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       'Cancel',
-                      style: textTheme.subtitle1.copyWith(
+                      style: textTheme.subtitle1?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -577,14 +583,14 @@ class _ExampleState extends State<Example> {
                     onPressed: () {
                       if (!isDismissable) {
                         isDismissable = true;
-                        SheetController.of(context).rebuild();
+                        SheetController.of(context)?.rebuild();
                       } else {
                         Navigator.pop(context);
                       }
                     },
                     child: Text(
                       'Approve',
-                      style: textTheme.subtitle1.copyWith(
+                      style: textTheme.subtitle1?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -599,6 +605,139 @@ class _ExampleState extends State<Example> {
     );
   }
 
+  ///弹窗带textfield
+  Future<void> showTextBottomSheetDialog(
+      BuildContext context, List<double> snappings,
+      {bool textfieldOptimization = true}) async {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    final controller = SheetController();
+
+    await showSlidingBottomSheet(
+      context,
+      // The parentBuilder can be used to wrap the sheet inside a parent.
+      // This can be for example a Theme or an AnnotatedRegion.
+      parentBuilder: (context, sheet) {
+        return Theme(
+          data: ThemeData.dark(),
+          child: sheet,
+        );
+      },
+      // The builder to build the dialog. Calling rebuilder on the dialogController
+      // will call the builder, allowing react to state changes while the sheet is shown.
+      builder: (context) {
+        return SlidingSheetDialog(
+            textfieldOptimization: textfieldOptimization,
+            controller: controller,
+            duration: const Duration(milliseconds: 350),
+            snapSpec: SnapSpec(
+              snap: true,
+              initialSnap: snappings.last,
+              snappings: snappings,
+              onSnap: (state, snap) {},
+            ),
+            scrollSpec: const ScrollSpec(physics: ClampingScrollPhysics()),
+            color: Colors.teal,
+            isDismissable: true,
+            dismissOnBackdropTap: true,
+            // isBackdropInteractable: true,
+            avoidStatusBar: true,
+            headerBuilder: (_, __) {
+              return const BottomSheetDragTag();
+            },
+            builder: (context, state) {
+              return CustomVerticalDragDetector(
+                onStart:
+                    hasFoucs(context) ? (e) => _onDragStart(e, context) : null,
+                child: Material(
+                  child: Container(
+                    color: Colors.teal,
+                    padding: const EdgeInsets.all(32),
+                    height: 1000,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Confirm purchase',
+                          style: textTheme.headline4?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(6))),
+                          height: 50,
+                          width: 200,
+                          child: const TextField(),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sagittis tellus lacus, et pulvinar orci eleifend in.',
+                                style: textTheme.subtitle1?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 56,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 400,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(6))),
+                          height: 50,
+                          width: 200,
+                          child: const TextField(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            });
+      },
+    );
+  }
+
+  void _onDragStart(DragStartDetails details, BuildContext context) {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final result = BoxHitTestResult();
+    renderBox?.hitTest(result, position: details.localPosition);
+    if (!result.path.any((e) => e.target is RenderMouseRegion)) {
+      // FocusScope.of(context).unfocus();
+      final FocusScopeNode currentFocus = FocusScope.of(context);
+      if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    }
+  }
+
+  bool hasFoucs(BuildContext context) {
+    final FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      return FocusManager.instance.primaryFocus?.hasFocus ?? false;
+    }
+    return false;
+  }
+
   Widget _buildBody() {
     return Stack(
       children: <Widget>[
@@ -606,9 +745,83 @@ class _ExampleState extends State<Example> {
         Align(
           alignment: Alignment.topRight,
           child: Padding(
-            padding:
-                EdgeInsets.fromLTRB(0, MediaQuery.of(context).padding.top + 16, 16, 0),
+            padding: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).padding.top + 460, 16, 0),
             child: FloatingActionButton(
+              heroTag: "6",
+              backgroundColor: Colors.white,
+              onPressed: () async {
+                await showTextBottomSheetDialog(context, [0.0, 0.9],
+                    textfieldOptimization: false);
+              },
+              child: const Text(
+                "0.5 :false",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).padding.top + 360, 16, 0),
+            child: FloatingActionButton(
+              heroTag: "5",
+              backgroundColor: Colors.white,
+              onPressed: () async {
+                await showTextBottomSheetDialog(context, [0.0, 0.5]);
+              },
+              child: const Text(
+                "0.5",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).padding.top + 260, 16, 0),
+            child: FloatingActionButton(
+              heroTag: "3",
+              backgroundColor: Colors.white,
+              onPressed: () async {
+                await showTextBottomSheetDialog(context, [0.0, 0.93]);
+              },
+              child: const Text(
+                "0.93",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).padding.top + 160, 16, 0),
+            child: FloatingActionButton(
+              heroTag: "1",
+              backgroundColor: Colors.white,
+              onPressed: () async {
+                await showTextBottomSheetDialog(context, [0.0, 0.6]);
+              },
+              child: const Text(
+                "0.6",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                0, MediaQuery.of(context).padding.top + 16, 16, 0),
+            child: FloatingActionButton(
+              heroTag: "2",
               backgroundColor: Colors.white,
               onPressed: () async {
                 await showBottomSheetDialog(context);

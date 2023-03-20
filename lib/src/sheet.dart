@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'sheet_container.dart';
 import 'specs.dart';
@@ -14,13 +12,17 @@ import 'util.dart';
 part 'scrolling.dart';
 part 'sheet_dialog.dart';
 
+///
 typedef SheetBuilder = Widget Function(BuildContext context, SheetState state);
 
+///
 typedef CustomSheetBuilder = Widget Function(
     BuildContext context, ScrollController controller, SheetState state);
 
+///
 typedef SheetListener = void Function(SheetState state);
 
+///
 typedef OnDismissPreventedCallback = void Function(
     bool backButton, bool backDrop);
 
@@ -235,6 +237,9 @@ class SlidingSheet extends StatefulWidget {
   /// {@endtemplate}
   final OnDismissPreventedCallback? onDismissPrevented;
 
+  ///键盘优化
+  final bool textfieldOptimization;
+
   /// Creates a sheet than can be dragged and scrolled in a single gesture to be
   /// placed inside you widget tree.
   ///
@@ -295,39 +300,40 @@ class SlidingSheet extends StatefulWidget {
     bool extendBody = false,
     double liftOnScrollHeaderElevation = 0.0,
     double liftOnScrollFooterElevation = 0.0,
+    bool textfieldOptimization = false,
   }) : this._(
-          key: key,
-          builder: builder,
-          customBuilder: customBuilder,
-          headerBuilder: headerBuilder,
-          footerBuilder: footerBuilder,
-          snapSpec: snapSpec,
-          duration: duration,
-          color: color,
-          backdropColor: backdropColor,
-          shadowColor: shadowColor,
-          elevation: elevation,
-          padding: padding,
-          avoidStatusBar: addTopViewPaddingOnFullscreen,
-          margin: margin,
-          border: border,
-          cornerRadius: cornerRadius,
-          cornerRadiusOnFullscreen: cornerRadiusOnFullscreen,
-          closeOnBackdropTap: closeOnBackdropTap,
-          listener: listener,
-          controller: controller,
-          scrollSpec: scrollSpec,
-          maxWidth: maxWidth,
-          minHeight: minHeight,
-          closeSheetOnBackButtonPressed: closeOnBackButtonPressed,
-          isBackdropInteractable: isBackdropInteractable,
-          body: body,
-          parallaxSpec: parallaxSpec,
-          axisAlignment: axisAlignment,
-          extendBody: extendBody,
-          liftOnScrollHeaderElevation: liftOnScrollHeaderElevation,
-          liftOnScrollFooterElevation: liftOnScrollFooterElevation,
-        );
+            key: key,
+            builder: builder,
+            customBuilder: customBuilder,
+            headerBuilder: headerBuilder,
+            footerBuilder: footerBuilder,
+            snapSpec: snapSpec,
+            duration: duration,
+            color: color,
+            backdropColor: backdropColor,
+            shadowColor: shadowColor,
+            elevation: elevation,
+            padding: padding,
+            avoidStatusBar: addTopViewPaddingOnFullscreen,
+            margin: margin,
+            border: border,
+            cornerRadius: cornerRadius,
+            cornerRadiusOnFullscreen: cornerRadiusOnFullscreen,
+            closeOnBackdropTap: closeOnBackdropTap,
+            listener: listener,
+            controller: controller,
+            scrollSpec: scrollSpec,
+            maxWidth: maxWidth,
+            minHeight: minHeight,
+            closeSheetOnBackButtonPressed: closeOnBackButtonPressed,
+            isBackdropInteractable: isBackdropInteractable,
+            body: body,
+            parallaxSpec: parallaxSpec,
+            axisAlignment: axisAlignment,
+            extendBody: extendBody,
+            liftOnScrollHeaderElevation: liftOnScrollHeaderElevation,
+            liftOnScrollFooterElevation: liftOnScrollFooterElevation,
+            textfieldOptimization: textfieldOptimization);
 
   SlidingSheet._({
     Key? key,
@@ -364,6 +370,7 @@ class SlidingSheet extends StatefulWidget {
     this.route,
     this.isDismissable = true,
     this.onDismissPrevented,
+    this.textfieldOptimization = false,
   })  : assert(builder != null || customBuilder != null),
         assert(builder == null || customBuilder == null),
         assert(snapSpec.snappings.length >= 2,
@@ -794,8 +801,7 @@ class _SlidingSheetState extends State<SlidingSheet>
 
       final num changeAdjustedExtent =
           ((currentExtent * previousHeight) / availableHeight)
-              .clamp(minExtent, maxExtent);
-
+              .clamp(widget.textfieldOptimization ? 0.0 : minExtent, maxExtent);
       final isAroundFixedSnap = snappings.any(
         (snap) => (snap - changeAdjustedExtent).abs() < 0.01,
       );
@@ -1027,7 +1033,8 @@ class _SlidingSheetState extends State<SlidingSheet>
     if (scrollSpec.overscroll) {
       scrollView = GlowingOverscrollIndicator(
         axisDirection: AxisDirection.down,
-        color: scrollSpec.overscrollColor ?? Theme.of(context).accentColor,
+        color: scrollSpec.overscrollColor ??
+            Theme.of(context).colorScheme.secondary,
         child: scrollView,
       );
     }
@@ -1091,7 +1098,6 @@ class _SlidingSheetState extends State<SlidingSheet>
             return 0.0;
           }
         }();
-
         final backDrop = IgnorePointer(
           ignoring: opacity < 0.05,
           child: Opacity(
