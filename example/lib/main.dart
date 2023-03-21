@@ -654,7 +654,7 @@ class _ExampleState extends State<Example> {
                   child: Container(
                     color: Colors.teal,
                     padding: const EdgeInsets.all(32),
-                    height: 1000,
+                    height: 500,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -695,9 +695,7 @@ class _ExampleState extends State<Example> {
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 400,
-                        ),
+                        Expanded(child: Container()),
                         Container(
                           decoration: BoxDecoration(
                               color: Colors.grey.shade100,
@@ -751,7 +749,7 @@ class _ExampleState extends State<Example> {
               heroTag: "6",
               backgroundColor: Colors.white,
               onPressed: () async {
-                await showTextBottomSheetDialog(context, [0.0, 0.9],
+                await showTextBottomSheetDialog(context, [0.0, 0.5],
                     textfieldOptimization: false);
               },
               child: const Text(

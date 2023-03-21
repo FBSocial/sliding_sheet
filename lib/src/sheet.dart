@@ -801,7 +801,7 @@ class _SlidingSheetState extends State<SlidingSheet>
 
       final num changeAdjustedExtent =
           ((currentExtent * previousHeight) / availableHeight)
-              .clamp(widget.textfieldOptimization ? 0.0 : minExtent, maxExtent);
+              .clamp(minExtent, maxExtent);
       final isAroundFixedSnap = snappings.any(
         (snap) => (snap - changeAdjustedExtent).abs() < 0.01,
       );
@@ -809,7 +809,8 @@ class _SlidingSheetState extends State<SlidingSheet>
       // Only update the currentExtent when its sitting at an extent that
       // is depenent on a fixed height, such as SnapSpec.headerSnap or absolute
       // snap values.
-      if (isAroundFixedSnap) {
+      if (isAroundFixedSnap &&
+          (!widget.textfieldOptimization || !dismissUnderway)) {
         currentExtent = changeAdjustedExtent as double;
       }
     }
