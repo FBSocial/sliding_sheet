@@ -82,6 +82,9 @@ class SlidingSheet extends StatefulWidget {
   /// {@endtemplate}
   final Color? shadowColor;
 
+  /// 支持外部自定义shadows
+  final List<BoxShadow>? boxShadows;
+
   /// {@template sliding_sheet.elevation}
   /// The elevation of the sheet.
   /// {@endtemplate}
@@ -285,6 +288,7 @@ class SlidingSheet extends StatefulWidget {
     Color? color,
     Color? backdropColor,
     Color shadowColor = Colors.black54,
+    List<BoxShadow>? boxShadows,
     double elevation = 0.0,
     EdgeInsets? padding,
     bool addTopViewPaddingOnFullscreen = false,
@@ -320,6 +324,7 @@ class SlidingSheet extends StatefulWidget {
       color: color,
       backdropColor: backdropColor,
       shadowColor: shadowColor,
+      boxShadows: boxShadows,
       elevation: elevation,
       padding: padding,
       avoidStatusBar: addTopViewPaddingOnFullscreen,
@@ -378,6 +383,7 @@ class SlidingSheet extends StatefulWidget {
     this.body,
     this.parallaxSpec,
     this.route,
+    this.boxShadows,
     this.isDismissable = true,
     this.onDismissPrevented,
     this.textfieldOptimization = false,
@@ -994,6 +1000,7 @@ double get initialExtent => snapSpec.initialSnap != null
                       ),
                       elevation: widget.elevation,
                       shadowColor: widget.shadowColor,
+                      boxShadows: widget.boxShadows,
                       customBorders: BorderRadius.vertical(
                         top: Radius.circular(cornerRadius!),
                       ),
