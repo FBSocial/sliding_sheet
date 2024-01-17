@@ -82,9 +82,6 @@ class SlidingSheet extends StatefulWidget {
   /// {@endtemplate}
   final Color? shadowColor;
 
-  /// 支持外部自定义shadows
-  final List<BoxShadow>? boxShadows;
-
   /// {@template sliding_sheet.elevation}
   /// The elevation of the sheet.
   /// {@endtemplate}
@@ -249,6 +246,13 @@ class SlidingSheet extends StatefulWidget {
   /// 拖动结束事件
   final VoidCallback? onDragEnd;
 
+  /// 支持外部自定义shadows
+  final List<BoxShadow>? boxShadows;
+
+  /// snap时的动画效果
+  final Curve? snapCurve;
+
+
   /// Creates a sheet than can be dragged and scrolled in a single gesture to be
   /// placed inside you widget tree.
   ///
@@ -289,6 +293,7 @@ class SlidingSheet extends StatefulWidget {
     Color? backdropColor,
     Color shadowColor = Colors.black54,
     List<BoxShadow>? boxShadows,
+    Curve? snapCurve,
     double elevation = 0.0,
     EdgeInsets? padding,
     bool addTopViewPaddingOnFullscreen = false,
@@ -320,6 +325,7 @@ class SlidingSheet extends StatefulWidget {
       headerBuilder: headerBuilder,
       footerBuilder: footerBuilder,
       snapSpec: snapSpec,
+      snapCurve: snapCurve,
       duration: duration,
       color: color,
       backdropColor: backdropColor,
@@ -384,6 +390,7 @@ class SlidingSheet extends StatefulWidget {
     this.parallaxSpec,
     this.route,
     this.boxShadows,
+    this.snapCurve,
     this.isDismissable = true,
     this.onDismissPrevented,
     this.textfieldOptimization = false,
@@ -465,6 +472,7 @@ double get initialExtent => snapSpec.initialSnap != null
   bool get isDialog => widget.route != null;
   ScrollSpec get scrollSpec => widget.scrollSpec;
   SnapSpec get snapSpec => widget.snapSpec;
+  Curve? get snapCurve => widget.snapCurve;
   SnapPositioning get snapPositioning => snapSpec.positioning;
 
   double get borderHeight => (widget.border?.top.width ?? 0) * 2;

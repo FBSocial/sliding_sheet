@@ -9,7 +9,7 @@ class _SheetExtent {
   double headerHeight = 0;
   double footerHeight = 0;
   double availableHeight = 0;
-  _SheetExtent(
+_SheetExtent(
     this.controller, {
     required this.isDialog,
     required this.snappings,
@@ -19,7 +19,7 @@ class _SheetExtent {
     minExtent = snappings.first.clamp(0.0, 1.0);
     _currentExtent = ValueNotifier(minExtent)
       ..addListener(
-        () => listener(currentExtent),
+            () => listener(currentExtent),
       );
   }
 
@@ -76,7 +76,7 @@ class _SlidingSheetScrollController extends ScrollController {
   void Function(double) get onPop => sheet._pop;
   Duration get duration => sheet.widget.duration;
   SnapSpec get snapSpec => sheet.snapSpec;
-
+  Curve? get snapCurve => sheet.snapCurve;
   double get currentExtent => extent.currentExtent;
   double get maxExtent => extent.maxExtent;
   double get minExtent => extent.minExtent;
@@ -91,11 +91,11 @@ class _SlidingSheetScrollController extends ScrollController {
 
   TickerFuture snapToExtent(
     double snap,
-    TickerProvider vsync, {
-    double velocity = 0.0,
-    Duration? duration,
-    bool clamp = true,
-  }) {
+      TickerProvider vsync, {
+        double velocity = 0.0,
+        Duration? duration,
+        bool clamp = true,
+      }) {
     _dispose();
 
     if (clamp) snap = snap.clamp(extent.minExtent, extent.maxExtent);
@@ -103,15 +103,16 @@ class _SlidingSheetScrollController extends ScrollController {
     // Adjust the animation duration for a snap to give it a more
     // realistic feel.
     final num distanceFactor =
-        ((currentExtent - snap).abs() / (maxExtent - minExtent))
-            .clamp(0.33, 1.0);
+    ((currentExtent - snap).abs() / (maxExtent - minExtent))
+        .clamp(0.33, 1.0);
     final speedFactor = 1.0 - ((velocity.abs() / 2500) * 0.33).clamp(0.0, 0.66);
     duration ??= this.duration * (distanceFactor * speedFactor);
 
     controller = AnimationController(duration: duration, vsync: vsync);
     final animation = CurvedAnimation(
       parent: controller!,
-      curve: velocity.abs() > 300 ? Curves.easeOutCubic : Curves.ease,
+      curve: snapCurve ??
+          (velocity.abs() > 300 ? Curves.easeOutCubic : Curves.ease),
     );
 
     final start = extent.currentExtent;
@@ -166,8 +167,8 @@ class _SlidingSheetScrollController extends ScrollController {
   @override
   _SlidingSheetScrollPosition createScrollPosition(
     ScrollPhysics physics,
-    ScrollContext context,
-    ScrollPosition? oldPosition,
+      ScrollContext context,
+      ScrollPosition? oldPosition,
   ) {
     return _currentPosition = _SlidingSheetScrollPosition(
       this,
@@ -193,18 +194,18 @@ class _SlidingSheetScrollController extends ScrollController {
 
 class _SlidingSheetScrollPosition extends ScrollPositionWithSingleContext {
   final _SlidingSheetScrollController scrollController;
-  _SlidingSheetScrollPosition(
-    this.scrollController, {
+
+  _SlidingSheetScrollPosition(this.scrollController, {
     required ScrollPhysics physics,
     required ScrollContext context,
     ScrollPosition? oldPosition,
     String? debugLabel,
   }) : super(
-          physics: physics,
-          context: context,
-          oldPosition: oldPosition,
-          debugLabel: debugLabel,
-        );
+    physics: physics,
+    context: context,
+    oldPosition: oldPosition,
+    debugLabel: debugLabel,
+  );
 
   VoidCallback? _dragCancelCallback;
   bool isMovingUp = true;
@@ -233,8 +234,8 @@ class _SlidingSheetScrollPosition extends ScrollPositionWithSingleContext {
   bool get isCoveringFullExtent => scrollController.sheet.isScrollable;
   bool get shouldMakeSheetNonDismissable =>
       sheet.didCompleteInitialRoute &&
-      !isDismissable &&
-      currentExtent < minExtent;
+          !isDismissable &&
+          currentExtent < minExtent;
   bool get isBottomSheetBelowMinExtent =>
       fromBottomSheet && currentExtent < minExtent;
 
@@ -361,8 +362,8 @@ class _SlidingSheetScrollPosition extends ScrollPositionWithSingleContext {
       final slow = velocity < snapToNextThreshold;
       final target = !slow
           ? ((isMovingUp ? 1 : -1) *
-                  (((velocity * .45) * (1 - currentExtent)) / flingThreshold)) +
-              currentExtent
+          (((velocity * .45) * (1 - currentExtent)) / flingThreshold)) +
+          currentExtent
           : currentExtent;
 
       void findSnap({bool greaterThanCurrent = true}) {
