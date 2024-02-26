@@ -1130,13 +1130,10 @@ double get initialExtent => snapSpec.initialSnap != null
         }();
         final backDrop = IgnorePointer(
           ignoring: opacity < 0.05,
-          child: Opacity(
-            opacity: opacity,
-            child: Container(
+          child: Container(
               width: double.infinity,
               height: double.infinity,
-              color: widget.backdropColor,
-            ),
+              color: Colors.black54.withOpacity(0.5 * opacity)
           ),
         );
 
